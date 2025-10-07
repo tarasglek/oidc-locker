@@ -57,6 +57,7 @@ app.use("*", async (c, next) => {
   .get(
     "/*",
     (c) => {
+      // this actually includes content-length unlike hono's serveStatic
       return serveDir(c.req.raw, {
         fsRoot: "dist",
       });
