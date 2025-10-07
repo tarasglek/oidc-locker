@@ -9,6 +9,6 @@ uses lastlogin.net for auth.
 1. copy `sample_config.json` to `config.json`
 2. edit `config.json` and add your users' emails. you can use regex.
 3. put your static files in `dist/`
-4. run it with `deno task start` or just drop the files into a smallweb.run app.
+4. run it with `deno task start` or just drop the files into a smallweb app.
 
 designed for [smallweb.run](https://smallweb.run). it figures out the oidc client id and secret from the `x-forwarded-host` header.
