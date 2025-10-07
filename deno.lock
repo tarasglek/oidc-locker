@@ -1,0 +1,76 @@
+{
+  "version": "5",
+  "specifiers": {
+    "jsr:@smallweb/sandbox@0.1.1": "0.1.1",
+    "jsr:@std/encoding@1.0.8": "1.0.8",
+    "jsr:@std/html@1.0.3": "1.0.3",
+    "jsr:@std/http@1.0.12": "1.0.12",
+    "npm:@hono/oidc-auth@^1.6.0": "1.7.0_hono@4.8.3",
+    "npm:hono@^4.0.1": "4.8.3"
+  },
+  "jsr": {
+    "@smallweb/sandbox@0.1.1": {
+      "integrity": "e90d4f3ca3abbc5b765e29ab90f12cc4e6c8754ec4311bc296ccf6240053f3e6",
+      "dependencies": [
+        "jsr:@std/encoding",
+        "jsr:@std/html",
+        "jsr:@std/http"
+      ]
+    },
+    "@std/encoding@1.0.8": {
+      "integrity": "a6c8f3f933ab1bed66244f435d1dc0fd23a888e07195532122ddc3d5f8f0e6b4"
+    },
+    "@std/html@1.0.3": {
+      "integrity": "7a0ac35e050431fb49d44e61c8b8aac1ebd55937e0dc9ec6409aa4bab39a7988"
+    },
+    "@std/http@1.0.12": {
+      "integrity": "85246d8bfe9c8e2538518725b158bdc31f616e0869255f4a8d9e3de919cab2aa"
+    }
+  },
+  "npm": {
+    "@duckdb/node-bindings-darwin-arm64@1.2.1-alpha.16": {
+      "integrity": "sha512-anfLXcxjo6S0Kx8Z+e6/ca7WayprJ8iI4cpTvzWQc9NT/vKFHcGjvhGAiosHvtjWGOvAYo+O/eyAcmzMzazlMg==",
+      "os": ["darwin"],
+      "cpu": ["arm64"]
+    },
+    "@duckdb/node-bindings-darwin-x64@1.2.1-alpha.16": {
+      "integrity": "sha512-IA2bQ/f0qFYb7Sd+leSjNg/JMBpWVVBoCmqp/1zzlw6fwhtT0BMSAT3FL4306t5StA8biOznlHz3rN3jovdVxg==",
+      "os": ["darwin"],
+      "cpu": ["x64"]
+    },
+    "@duckdb/node-bindings-linux-arm64@1.2.1-alpha.16": {
+      "integrity": "sha512-zy9jTrrhTXJAOrYRTbT/HtBLClAoyo8vNRAqojFHVBxXL1nr4o+5Je9AJwb9IfS1/e38zdykDWeGnY/gB3NpfA==",
+      "os": ["linux"],
+      "cpu": ["arm64"]
+    },
+    "@duckdb/node-bindings-linux-x64@1.2.1-alpha.16": {
+      "integrity": "sha512-tdDAhUKenBhUQiTN+qvKj6nBshoooBLPbxVuLas8v64KmphjxOHd9zQ2KMzw1tN+fXhV9dqUTbCqiUN9A6ZFSQ==",
+      "os": ["linux"],
+      "cpu": ["x64"]
+    },
+    "@duckdb/node-bindings-win32-x64@1.2.1-alpha.16": {
+      "integrity": "sha512-FE9bZV8+LIiy5jQIsLoEmwLFIyPPJD4SXjKNCaU48DNVf1q81ZkhnoT7PVgeyNJmkR6rG2+mq6LzTSmdCBX0ig==",
+      "os": ["win32"],
+      "cpu": ["x64"]
+    },
+    "@hono/oidc-auth@1.7.0_hono@4.8.3": {
+      "integrity": "sha512-lJnGrz1ktYPsLKDgLNwl2bKbRFC3ZJb8GUIpMfY8QQEnmmlDtJX0NA2YnW+SgEROAWO5suY/QBlRjEM+xlLo8A==",
+      "dependencies": [
+        "hono",
+        "oauth4webapi"
+      ]
+    },
+    "hono@4.8.3": {
+      "integrity": "sha512-jYZ6ZtfWjzBdh8H/0CIFfCBHaFL75k+KMzaM177hrWWm2TWL39YMYaJgB74uK/niRc866NMlH9B8uCvIo284WQ=="
+    },
+    "oauth4webapi@2.17.0": {
+      "integrity": "sha512-lbC0Z7uzAFNFyzEYRIC+pkSVvDHJTbEW+dYlSBAlCYDe6RxUkJ26bClhk8ocBZip1wfI9uKTe0fm4Ib4RHn6uQ=="
+    }
+  },
+  "workspace": {
+    "dependencies": [
+      "npm:@hono/oidc-auth@^1.6.0",
+      "npm:hono@^4.0.1"
+    ]
+  }
+}
