@@ -1,0 +1,6 @@
+{
+  "allowedEmails": [
+    "user@example.com",
+    ".*@gmail.com"
+  ]
+}
