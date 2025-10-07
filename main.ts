@@ -48,6 +48,7 @@ app.use("*", async (c, next) => {
 
     if (!isAllowed) {
       const err = `permission denied for <${email}>`;
+      console.error(err);
       await revokeSession(c);
       return c.text(err, 403);
     }
