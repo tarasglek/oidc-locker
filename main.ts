@@ -2,7 +2,7 @@ import { Hono } from "@hono/hono";
 import { logger } from "@hono/hono/logger";
 import { getAuth, oidcAuthMiddleware, revokeSession } from "@hono/oidc-auth";
 import { serveStatic } from "@hono/hono/deno";
-
+import { serveDir } from "@std/http/file-server";
 const config = JSON.parse(await Deno.readTextFile("./config.json"));
 const allowedEmails: string[] = config.allowedEmails;
 
@@ -56,9 +56,11 @@ app.use("*", async (c, next) => {
   })
   .get(
     "/*",
-    serveStatic({
-      root: "dist/",
-    }),
+    (c) => {
+      return serveDir(c.req.raw, {
+        fsRoot: "dist",
+      });
+    },
   );
 // .get("/", async (c) => {
 //   const auth = await getAuth(c);

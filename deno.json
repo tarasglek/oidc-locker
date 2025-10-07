@@ -5,6 +5,7 @@
   },
   "imports": {
     "@hono/hono": "npm:hono@^4.0.1",
-    "@hono/oidc-auth": "npm:@hono/oidc-auth@^1.6.0"
+    "@hono/oidc-auth": "npm:@hono/oidc-auth@^1.6.0",
+    "@std/http": "jsr:@std/http@^1.0.21"
   }
 }
