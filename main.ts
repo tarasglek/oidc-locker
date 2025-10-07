@@ -3,8 +3,6 @@ import { logger } from "@hono/hono/logger";
 import { getAuth, oidcAuthMiddleware, revokeSession } from "@hono/oidc-auth";
 import { serveStatic } from "@hono/hono/deno";
 
-console.log(`main.ts path: ${import.meta.url}`);
-
 const config = JSON.parse(await Deno.readTextFile("./config.json"));
 const allowedEmails: string[] = config.allowedEmails;
 
@@ -13,7 +11,6 @@ const app = new Hono();
 app.use("*", async (c, next) => {
   const host = c.req.header("x-forwarded-host");
   if (host) {
-    console.log(`App domain: ${host}`);
     Deno.env.set("OIDC_CLIENT_ID", `https://${host}/auth`);
 
     const secretString = host + import.meta.url;
@@ -51,7 +48,6 @@ app.use("*", async (c, next) => {
 
     if (!isAllowed) {
       const err = `permission denied for <${email}>`;
-      console.error(err);
       await revokeSession(c);
       return c.text(err, 403);
     }
