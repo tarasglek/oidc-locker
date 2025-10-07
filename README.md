@@ -1,4 +1,4 @@
-# oidc-gated-static-server
+# SSO-gated static file server for sharing private files
 
 minimal webserver to gate access to static files via oidc.
 
