@@ -10,7 +10,7 @@ const app = new Hono();
 
 app.use("*", async (c, next) => {
   const host = c.req.header("x-forwarded-host");
-  if (host) {
+  if (host) {// factor out this oidc logic into Locker.init({domain:,secret:,oidc_issuer} AI!
     Deno.env.set("OIDC_CLIENT_ID", `https://${host}/auth`);
 
     const secretString = host + import.meta.url;
