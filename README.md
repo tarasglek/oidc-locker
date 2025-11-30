@@ -9,42 +9,7 @@ A library to quickly add OIDC authentication to Deno/Hono applications. Uses Las
 
 ## Usage Example
 
-Here's how to use it in a Hono app:
-
-```typescript
-import { Hono } from "@hono/hono";
-import { logger } from "@hono/hono/logger";
-import { serveDir } from "@std/http/file-server";
-import { Locker, emailRegexpChecker, getSecret } from "@tarasglek/locker";
-
-const config = JSON.parse(await Deno.readTextFile("./config.json"));
-let locker: typeof Locker | undefined;
-
-const app = new Hono();
-
-app.use("*", async (c, next) => {
-  const host = c.req.header("x-forwarded-host");
-  if (host && !locker) {
-    locker = await Locker.init({
-      domain: host,
-      secret: await getSecret(host + import.meta.url),
-      oidc_issuer: "https://lastlogin.net/",
-      checker: emailRegexpChecker(config.allowedEmails as string[]),
-    });
-  }
-  await next();
-})
-.use(logger())
-.get("/logout", async (c) => {
-  await locker!.revokeSession(c);
-  return c.html(`You have been successfully logged out! <a href="/">home</a>`);
-})
-.use("*", (c, next) => locker!.oidcAuthMiddleware()(c, next))
-.use("*", (c, next) => locker!.check()(c, next))
-.get("/*", (c) => serveDir(c.req.raw, { fsRoot: "dist" }));
-
-export default app;
-```
+See [main.ts](./main.ts) for a complete example of how to use this library in a Hono app.
 
 ## Configuration
 
