@@ -1,6 +1,6 @@
 # Locker - OIDC Authentication for Deno/Hono Apps
 
-A library to quickly add OIDC authentication to Deno/Hono applications. Uses LastLogin.net for authentication.
+A library to quickly add OIDC authentication to Deno/Hono applications. Has defaults to use LastLogin.net for authentication, but should be usable with other oidc providers.
 
 ## Features
 - Simple email-based access control with regex support
