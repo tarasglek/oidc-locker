@@ -45,20 +45,25 @@ export const Locker = {
 
   oidcAuthMiddleware() {
     return async (c: Context, next: Next) => {
-      await initOidcAuthMiddleware(this.oidcConfig!)(c, async () => {
-        await oidcAuthMiddleware()(c, next);
-      });
+      if (!c.get("oidcAuthEnv")) {
+        await initOidcAuthMiddleware(this.oidcConfig!)(c, async () => {});
+      }
+      return await oidcAuthMiddleware()(c, next);
     };
   },
 
   async revokeSession(c: Context) {
-    await initOidcAuthMiddleware(this.oidcConfig!)(c, async () => {
-      await revokeSession(c);
-    });
+    if (!c.get("oidcAuthEnv")) {
+      await initOidcAuthMiddleware(this.oidcConfig!)(c, async () => {});
+    }
+    await revokeSession(c);
   },
 
   check(validator?: (email: string) => boolean) {
     return async (c: Context, next: Next) => {
+      if (!c.get("oidcAuthEnv")) {
+        await initOidcAuthMiddleware(this.oidcConfig!)(c, async () => {});
+      }
       const auth = await getAuth(c);
       const email = auth?.email;
       const v = validator || this.checker;
