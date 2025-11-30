@@ -23,7 +23,7 @@ app.use("*", async (c, next) => {
       const hashBuffer = await crypto.subtle.digest("SHA-256", secretData);
       const hashArray = Array.from(new Uint8Array(hashBuffer));
       const hashHex = hashArray.map((b) => b.toString(16).padStart(2, "0"))
-        .join("");
+        .join(""); // move all this secret calculation into a util func in locker have it take param salt:string and  pass import.meta.url  AI!
 
       locker = await Locker.init({
         domain: host,
