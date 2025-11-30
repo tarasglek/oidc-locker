@@ -2,7 +2,7 @@ import { Hono } from "@hono/hono";
 import { Context } from "@hono/hono";
 import { logger } from "@hono/hono/logger";
 import { serveDir } from "@std/http/file-server";
-import { Locker,  emailRegexpChecker} from "./locker.ts";
+import { Locker, emailRegexpChecker, getSecret } from "./locker.ts";
 const config = JSON.parse(await Deno.readTextFile("./config.json"));
 
 let locker: typeof Locker | undefined;
@@ -13,21 +13,9 @@ app.use("*", async (c, next) => {
   const host = c.req.header("x-forwarded-host");
   if (host) {
     if (!locker) {
-      // Calculate boot time floored to the hour to ensure stability across restarts
-      // while still being specific to this boot instance (mostly).
-      const bootTimeHour = Math.floor((Date.now() - Deno.osUptime() * 1000) / 3600000);
-      console.log("Boot time hour:", bootTimeHour);
-
-      const secretString = host + import.meta.url + Deno.cwd() + Deno.hostname() + bootTimeHour;
-      const secretData = new TextEncoder().encode(secretString);
-      const hashBuffer = await crypto.subtle.digest("SHA-256", secretData);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const hashHex = hashArray.map((b) => b.toString(16).padStart(2, "0"))
-        .join(""); // move all this secret calculation into a util func in locker have it take param salt:string and  pass import.meta.url  AI!
-
       locker = await Locker.init({
         domain: host,
-        secret: hashHex,
+        secret: await getSecret(host, import.meta.url),
         oidc_issuer: "https://lastlogin.net/",
         checker: emailRegexpChecker(config.allowedEmails as string[]),
       });
