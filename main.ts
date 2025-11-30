@@ -13,9 +13,16 @@ app.use("*", async (c, next) => {
   const host = c.req.header("x-forwarded-host");
   if (host) {
     if (!locker) {
+      const secretString = host + import.meta.url;
+      const secretData = new TextEncoder().encode(secretString);
+      const hashBuffer = await crypto.subtle.digest("SHA-256", secretData);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hashHex = hashArray.map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
+
       locker = await Locker.init({
         domain: host,
-        secret: import.meta.url,
+        secret: hashHex,
         oidc_issuer: "https://lastlogin.net/",
         checker: emailRegexpChecker(config.allowedEmails as string[]),
       });

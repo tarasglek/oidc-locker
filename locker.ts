@@ -1,7 +1,10 @@
 import { Context, Next } from "@hono/hono";
 import { getAuth, initOidcAuthMiddleware, oidcAuthMiddleware, revokeSession, OidcAuthEnv } from "@hono/oidc-auth";
 
-export const emailRegexpChecker = (allowedEmails: string[]) => (email: string) => {
+export const emailRegexpChecker = (allowedEmails: string[]) => async (c: Context) => {
+  const auth = await getAuth(c);
+  const email = auth?.email;
+  if (typeof email !== "string") return false;
   return allowedEmails.some((pattern) => {
     if (email === pattern) return true;
     try {
@@ -13,7 +16,7 @@ export const emailRegexpChecker = (allowedEmails: string[]) => (email: string) =
 };
 
 export const Locker = {
-  checker: undefined as ((email: string) => boolean) | undefined,
+  checker: undefined as ((c: Context) => Promise<boolean> | boolean) | undefined,
   oidcConfig: undefined as Partial<OidcAuthEnv> | undefined,
 
   async init(
@@ -21,19 +24,12 @@ export const Locker = {
       domain: string;
       secret: string;
       oidc_issuer: string;
-      checker?: (email: string) => boolean; //dhecker should take context and extract email from it AI!
+      checker?: (c: Context) => Promise<boolean> | boolean;
     },
   ) {
-    const secretString = domain + secret;
-    const secretData = new TextEncoder().encode(secretString);
-    const hashBuffer = await crypto.subtle.digest("SHA-256", secretData);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashHex = hashArray.map((b) => b.toString(16).padStart(2, "0"))
-      .join("");
-
     this.oidcConfig = {
       OIDC_CLIENT_ID: `https://${domain}/auth`,
-      OIDC_AUTH_SECRET: hashHex,//secret should be a required param, should not be calculated here AI!
+      OIDC_AUTH_SECRET: secret,
       OIDC_CLIENT_SECRET: "this.isnt-used-by-lastlogin",
       OIDC_ISSUER: oidc_issuer,
     };
@@ -59,17 +55,17 @@ export const Locker = {
     await revokeSession(c);
   },
 
-  check(validator?: (email: string) => boolean) {
+  check(validator?: (c: Context) => Promise<boolean> | boolean) {
     return async (c: Context, next: Next) => {
       if (!c.get("oidcAuthEnv")) {
         await initOidcAuthMiddleware(this.oidcConfig!)(c, async () => {});
       }
-      const auth = await getAuth(c);
-      const email = auth?.email;
       const v = validator || this.checker;
-      const isAllowed = typeof email === "string" && v && v(email);
+      const isAllowed = v ? await v(c) : false;
 
       if (!isAllowed) {
+        const auth = await getAuth(c);
+        const email = auth?.email;
         const err = `permission denied for <${email}>`;
         console.error(err);
         await revokeSession(c);
