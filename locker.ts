@@ -21,7 +21,7 @@ export const Locker = {
       domain: string;
       secret: string;
       oidc_issuer: string;
-      checker?: (email: string) => boolean;
+      checker?: (email: string) => boolean; //dhecker should take context and extract email from it AI!
     },
   ) {
     const secretString = domain + secret;
@@ -33,7 +33,7 @@ export const Locker = {
 
     this.oidcConfig = {
       OIDC_CLIENT_ID: `https://${domain}/auth`,
-      OIDC_AUTH_SECRET: hashHex,
+      OIDC_AUTH_SECRET: hashHex,//secret should be a required param, should not be calculated here AI!
       OIDC_CLIENT_SECRET: "this.isnt-used-by-lastlogin",
       OIDC_ISSUER: oidc_issuer,
     };

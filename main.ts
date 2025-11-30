@@ -1,9 +1,9 @@
 import { Hono } from "@hono/hono";
+import { Context } from "@hono/hono";
 import { logger } from "@hono/hono/logger";
 import { serveDir } from "@std/http/file-server";
 import { Locker,  emailRegexpChecker} from "./locker.ts";
 const config = JSON.parse(await Deno.readTextFile("./config.json"));
-const allowedEmails: string[] = config.allowedEmails;
 
 let locker: typeof Locker | undefined;
 
@@ -17,14 +17,14 @@ app.use("*", async (c, next) => {
         domain: host,
         secret: import.meta.url,
         oidc_issuer: "https://lastlogin.net/",
-        checker: emailRegexpChecker(allowedEmails),
+        checker: emailRegexpChecker(config.allowedEmails as string[]),
       });
     }
   }
   await next();
 }).use(logger())
   .get("/logout", async (c) => {
-    await locker!.revokeSession(c);
+    await locker!.revokeSession(c as Context);
     return c.html(
       `You have been successfully logged out! <a href="/">home</a>`,
     );
