@@ -41,7 +41,7 @@ app.use("*", async (c, next) => {
     },
   )
 .get("/", async (c) => {
-  const auth = await getAuth(c);// add getAuth to locker AI!
+  const auth = await locker!.getAuth(c);
   console.log("auth:", auth);
   return c.html(`Hello &lt;${auth?.email}&gt;! <a href="/logout">Logout</a>`);
 });

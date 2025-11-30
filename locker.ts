@@ -33,6 +33,7 @@ export const emailRegexpChecker = (allowedEmails: string[]) => async (c: Context
 export interface Locker {
   checker: ((c: Context) => Promise<boolean> | boolean) | undefined;
   oidcConfig: Partial<OidcAuthEnv> | undefined;
+  getAuth(c: Context): ReturnType<typeof getAuth>;
   init(config: {
     domain: string;
     secret: string;
@@ -82,6 +83,10 @@ export const Locker: Locker = {
       await initOidcAuthMiddleware(this.oidcConfig!)(c, async () => {});
     }
     await revokeSession(c);
+  },
+
+  getAuth(c: Context) {
+    return getAuth(c);
   },
 
   check(validator?: (c: Context) => Promise<boolean> | boolean) {
