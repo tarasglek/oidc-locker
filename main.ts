@@ -11,19 +11,12 @@ const app = new Hono();
 
 app.use("*", async (c, next) => {
   const host = c.req.header("x-forwarded-host");
-  if (host) {// factor out this oidc logic into Locker.init({domain:,secret:,oidc_issuer} AI!
-    Deno.env.set("OIDC_CLIENT_ID", `https://${host}/auth`);
-
-    const secretString = host + import.meta.url;
-    const secretData = new TextEncoder().encode(secretString);
-    const hashBuffer = await crypto.subtle.digest("SHA-256", secretData);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashHex = hashArray.map((b) => b.toString(16).padStart(2, "0"))
-      .join("");
-    Deno.env.set("OIDC_AUTH_SECRET", hashHex);
-
-    Deno.env.set("OIDC_CLIENT_SECRET", "this.isnt-used-by-lastlogin");
-    Deno.env.set("OIDC_ISSUER", "https://lastlogin.net/");
+  if (host) {
+    await Locker.init({
+      domain: host,
+      secret: import.meta.url,
+      oidc_issuer: "https://lastlogin.net/",
+    });
   }
   await next();
 }).use(logger())
