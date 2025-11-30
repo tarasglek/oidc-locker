@@ -1,13 +1,13 @@
 import { Context, Next } from "@hono/hono";
 import { getAuth, initOidcAuthMiddleware, oidcAuthMiddleware, revokeSession, OidcAuthEnv } from "@hono/oidc-auth";
 
-export const getSecret = async (domain: string, salt: string) => {
+export const getSecret = async (salt: string) => {
   // Calculate boot time floored to the hour to ensure stability across restarts
   // while still being specific to this boot instance (mostly).
   const bootTimeHour = Math.floor((Date.now() - Deno.osUptime() * 1000) / 3600000);
   console.log("Boot time hour:", bootTimeHour);
 
-  const secretString = domain + salt + Deno.cwd() + Deno.hostname() + bootTimeHour;
+  const secretString = salt + Deno.cwd() + Deno.hostname() + bootTimeHour;
   const secretData = new TextEncoder().encode(secretString);
   const hashBuffer = await crypto.subtle.digest("SHA-256", secretData);
   const hashArray = Array.from(new Uint8Array(hashBuffer));

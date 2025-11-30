@@ -15,7 +15,7 @@ app.use("*", async (c, next) => {
     if (!locker) {
       locker = await Locker.init({
         domain: host,
-        secret: await getSecret(host, import.meta.url),
+        secret: await getSecret(host + import.meta.url),
         oidc_issuer: "https://lastlogin.net/",
         checker: emailRegexpChecker(config.allowedEmails as string[]),
       });
