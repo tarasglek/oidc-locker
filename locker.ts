@@ -1,3 +1,6 @@
+import { Context, Next } from "@hono/hono";
+import { getAuth, oidcAuthMiddleware, revokeSession } from "@hono/oidc-auth";
+
 export const Locker = {
   async init(
     { domain, secret, oidc_issuer }: {
@@ -18,5 +21,27 @@ export const Locker = {
 
     Deno.env.set("OIDC_CLIENT_SECRET", "this.isnt-used-by-lastlogin");
     Deno.env.set("OIDC_ISSUER", oidc_issuer);
+
+    return this;
+  },
+
+  oidcAuthMiddleware() {
+    return oidcAuthMiddleware();
+  },
+
+  check(validator: (email: string) => boolean) {
+    return async (c: Context, next: Next) => {
+      const auth = await getAuth(c);
+      const email = auth?.email;
+      const isAllowed = typeof email === "string" && validator(email);
+
+      if (!isAllowed) {
+        const err = `permission denied for <${email}>`;
+        console.error(err);
+        await revokeSession(c);
+        return c.text(err, 403);
+      }
+      await next();
+    };
   },
 };

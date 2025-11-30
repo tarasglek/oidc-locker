@@ -1,21 +1,25 @@
 import { Hono } from "@hono/hono";
 import { logger } from "@hono/hono/logger";
-import { getAuth, oidcAuthMiddleware, revokeSession } from "@hono/oidc-auth";
+import { revokeSession } from "@hono/oidc-auth";
 import { serveDir } from "@std/http/file-server";
 import { Locker } from "./locker.ts";
 const config = JSON.parse(await Deno.readTextFile("./config.json"));
 const allowedEmails: string[] = config.allowedEmails;
+
+let locker: typeof Locker | undefined;
 
 const app = new Hono();
 
 app.use("*", async (c, next) => {
   const host = c.req.header("x-forwarded-host");
   if (host) {
-    await Locker.init({
-      domain: host,
-      secret: import.meta.url,
-      oidc_issuer: "https://lastlogin.net/",
-    });// should do let locker = undefined...then set it rval of Locker.init if its not defined. AI!
+    if (!locker) {
+      locker = await Locker.init({
+        domain: host,
+        secret: import.meta.url,
+        oidc_issuer: "https://lastlogin.net/",
+      });
+    }
   }
   await next();
 }).use(logger())
@@ -25,11 +29,9 @@ app.use("*", async (c, next) => {
       `You have been successfully logged out! <a href="/">home</a>`,
     );
   })
-  .use("*", oidcAuthMiddleware())// move to locker.oidcAuthMiddleware() AI!
-  .use("*", async (c, next) => {//shoild move this into locker.check() middleware that we pass validator(email) labmda to AI!
-    const auth = await getAuth(c);
-    const email = auth?.email;
-    const isAllowed = typeof email === "string" &&
+  .use("*", (c, next) => locker!.oidcAuthMiddleware()(c, next))
+  .use("*", (c, next) =>
+    locker!.check((email) =>
       allowedEmails.some((pattern) => {
         if (email === pattern) return true;
         try {
@@ -37,16 +39,8 @@ app.use("*", async (c, next) => {
         } catch {
           return false;
         }
-      });
-
-    if (!isAllowed) {
-      const err = `permission denied for <${email}>`;
-      console.error(err);
-      await revokeSession(c);
-      return c.text(err, 403);
-    }
-    await next();
-  })
+      })
+    )(c, next))
   .get(
     "/*",
     (c) => {
