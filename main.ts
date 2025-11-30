@@ -13,7 +13,12 @@ app.use("*", async (c, next) => {
   const host = c.req.header("x-forwarded-host");
   if (host) {
     if (!locker) {
-      const secretString = host + import.meta.url;
+      // Calculate boot time floored to the hour to ensure stability across restarts
+      // while still being specific to this boot instance (mostly).
+      const bootTimeHour = Math.floor((Date.now() - Deno.osUptime() * 1000) / 3600000);
+      console.log("Boot time hour:", bootTimeHour);
+
+      const secretString = host + import.meta.url + Deno.cwd() + Deno.hostname() + bootTimeHour;
       const secretData = new TextEncoder().encode(secretString);
       const hashBuffer = await crypto.subtle.digest("SHA-256", secretData);
       const hashArray = Array.from(new Uint8Array(hashBuffer));
