@@ -2,7 +2,7 @@ import { Hono } from "@hono/hono";
 import { logger } from "@hono/hono/logger";
 import { revokeSession } from "@hono/oidc-auth";
 import { serveDir } from "@std/http/file-server";
-import { Locker } from "./locker.ts";
+import { Locker,  emailRegexpChecker} from "./locker.ts";
 const config = JSON.parse(await Deno.readTextFile("./config.json"));
 const allowedEmails: string[] = config.allowedEmails;
 
@@ -18,6 +18,7 @@ app.use("*", async (c, next) => {
         domain: host,
         secret: import.meta.url,
         oidc_issuer: "https://lastlogin.net/",
+        // also add checker: emailRegexpChecker(allowedEmails) AI!
       });
     }
   }
@@ -31,7 +32,7 @@ app.use("*", async (c, next) => {
   })
   .use("*", (c, next) => locker!.oidcAuthMiddleware()(c, next))
   .use("*", (c, next) =>
-    locker!.check((email) =>
+    locker!.check((email) => // should be locker!.check() here once code below is moved into new func emailRegexpChecker AI!
       allowedEmails.some((pattern) => {
         if (email === pattern) return true;
         try {
