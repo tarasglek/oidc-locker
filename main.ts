@@ -18,7 +18,7 @@ app.use("*", async (c, next) => {
         domain: host,
         secret: import.meta.url,
         oidc_issuer: "https://lastlogin.net/",
-        // also add checker: emailRegexpChecker(allowedEmails) AI!
+        checker: emailRegexpChecker(allowedEmails),
       });
     }
   }
@@ -31,17 +31,7 @@ app.use("*", async (c, next) => {
     );
   })
   .use("*", (c, next) => locker!.oidcAuthMiddleware()(c, next))
-  .use("*", (c, next) =>
-    locker!.check((email) => // should be locker!.check() here once code below is moved into new func emailRegexpChecker AI!
-      allowedEmails.some((pattern) => {
-        if (email === pattern) return true;
-        try {
-          return new RegExp(pattern).test(email);
-        } catch {
-          return false;
-        }
-      })
-    )(c, next))
+  .use("*", (c, next) => locker!.check()(c, next))
   .get(
     "/*",
     (c) => {
