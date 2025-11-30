@@ -2,7 +2,7 @@ import { Hono } from "@hono/hono";
 import type { Context } from "@hono/hono";
 import { logger } from "@hono/hono/logger";
 import { serveDir } from "@std/http/file-server";
-import { Locker, emailRegexpChecker, getSecret } from "./locker.ts"; // use jsr:@tarasglek/locker
+import { emailRegexpChecker, getSecret, Locker } from "./locker.ts"; // use jsr:@tarasglek/locker
 const config = JSON.parse(await Deno.readTextFile("./config.json"));
 
 let locker: typeof Locker | undefined;
@@ -31,6 +31,11 @@ app.use("*", async (c, next) => {
   })
   .use("*", (c, next) => locker!.oidcAuthMiddleware()(c, next))
   .use("*", (c, next) => locker!.check()(c, next))
+  .get("/", async (c) => {
+    const auth = await locker!.getAuth(c);
+    console.log("auth:", auth);
+    return c.html(`Hello &lt;${auth?.email}&gt;! <a href="/logout">Logout</a>`);
+  })
   .get(
     "/*",
     (c) => {
@@ -39,11 +44,6 @@ app.use("*", async (c, next) => {
         fsRoot: "dist",
       });
     },
-  )
-.get("/", async (c) => {
-  const auth = await locker!.getAuth(c);
-  console.log("auth:", auth);
-  return c.html(`Hello &lt;${auth?.email}&gt;! <a href="/logout">Logout</a>`);
-});
+  );
 
 export default app;
