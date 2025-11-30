@@ -1,11 +1,19 @@
-import { Context, Next } from "@hono/hono";
-import { getAuth, initOidcAuthMiddleware, oidcAuthMiddleware, revokeSession, OidcAuthEnv } from "@hono/oidc-auth";
+import type { Context, Next } from "@hono/hono";
+import {
+  getAuth,
+  initOidcAuthMiddleware,
+  type OidcAuthEnv,
+  oidcAuthMiddleware,
+  revokeSession,
+} from "@hono/oidc-auth";
 
 export const getSecret = async (salt: string): Promise<string> => {
   // Calculate boot time floored to the hour to ensure stability across restarts
   // while still being specific to this boot instance (mostly).
-  const bootTimeHour = Math.floor((Date.now() - Deno.osUptime() * 1000) / 3600000);
-  console.log("Boot time hour:", bootTimeHour);
+  const bootTimeHour = Math.floor(
+    (Date.now() - Deno.osUptime() * 1000) / 3600000,
+  );
+  // console.log("Boot time hour:", bootTimeHour);
 
   const secretString = salt + Deno.cwd() + Deno.hostname() + bootTimeHour;
   const secretData = new TextEncoder().encode(secretString);
@@ -16,19 +24,20 @@ export const getSecret = async (salt: string): Promise<string> => {
   return hashHex;
 };
 
-export const emailRegexpChecker = (allowedEmails: string[]) => async (c: Context): Promise<boolean> => {
-  const auth = await getAuth(c);
-  const email = auth?.email;
-  if (typeof email !== "string") return false;
-  return allowedEmails.some((pattern) => {
-    if (email === pattern) return true;
-    try {
-      return new RegExp(pattern).test(email);
-    } catch {
-      return false;
-    }
-  });
-};
+export const emailRegexpChecker =
+  (allowedEmails: string[]) => async (c: Context): Promise<boolean> => {
+    const auth = await getAuth(c);
+    const email = auth?.email;
+    if (typeof email !== "string") return false;
+    return allowedEmails.some((pattern) => {
+      if (email === pattern) return true;
+      try {
+        return new RegExp(pattern).test(email);
+      } catch {
+        return false;
+      }
+    });
+  };
 
 export interface Locker {
   checker: ((c: Context) => Promise<boolean> | boolean) | undefined;
@@ -42,7 +51,9 @@ export interface Locker {
   }): Promise<Locker>;
   oidcAuthMiddleware(): (c: Context, next: Next) => Promise<Response | void>;
   revokeSession(c: Context): Promise<void>;
-  check(validator?: (c: Context) => Promise<boolean> | boolean): (c: Context, next: Next) => Promise<Response | void>;
+  check(
+    validator?: (c: Context) => Promise<boolean> | boolean,
+  ): (c: Context, next: Next) => Promise<Response | void>;
 }
 
 export const Locker: Locker = {
