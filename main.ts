@@ -25,7 +25,7 @@ app.use("*", async (c, next) => {
   await next();
 }).use(logger())
   .get("/logout", async (c) => {
-    await revokeSession(c);
+    await revokeSession(c);// should be locker. revokeSession AI!
     return c.html(
       `You have been successfully logged out! <a href="/">home</a>`,
     );
