@@ -1,7 +1,6 @@
 import { Hono } from "@hono/hono";
 import { logger } from "@hono/hono/logger";
 import { getAuth, oidcAuthMiddleware, revokeSession } from "@hono/oidc-auth";
-import { serveStatic } from "@hono/hono/deno";
 import { serveDir } from "@std/http/file-server";
 import { Locker } from "./locker.ts";
 const config = JSON.parse(await Deno.readTextFile("./config.json"));
@@ -16,7 +15,7 @@ app.use("*", async (c, next) => {
       domain: host,
       secret: import.meta.url,
       oidc_issuer: "https://lastlogin.net/",
-    });
+    });// should do let locker = undefined...then set it rval of Locker.init if its not defined. AI!
   }
   await next();
 }).use(logger())
@@ -26,8 +25,8 @@ app.use("*", async (c, next) => {
       `You have been successfully logged out! <a href="/">home</a>`,
     );
   })
-  .use("*", oidcAuthMiddleware())
-  .use("*", async (c, next) => {
+  .use("*", oidcAuthMiddleware())// move to locker.oidcAuthMiddleware() AI!
+  .use("*", async (c, next) => {//shoild move this into locker.check() middleware that we pass validator(email) labmda to AI!
     const auth = await getAuth(c);
     const email = auth?.email;
     const isAllowed = typeof email === "string" &&
