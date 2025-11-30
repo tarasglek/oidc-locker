@@ -1,5 +1,5 @@
 import { Context, Next } from "@hono/hono";
-import { getAuth, oidcAuthMiddleware, revokeSession } from "@hono/oidc-auth";
+import { getAuth, initOidcAuthMiddleware, oidcAuthMiddleware, revokeSession, OidcAuthEnv } from "@hono/oidc-auth";
 
 export const emailRegexpChecker = (allowedEmails: string[]) => (email: string) => {
   return allowedEmails.some((pattern) => {
@@ -14,6 +14,7 @@ export const emailRegexpChecker = (allowedEmails: string[]) => (email: string) =
 
 export const Locker = {
   checker: undefined as ((email: string) => boolean) | undefined,
+  oidcConfig: undefined as Partial<OidcAuthEnv> | undefined,
 
   async init(
     { domain, secret, oidc_issuer, checker }: {
@@ -23,18 +24,19 @@ export const Locker = {
       checker?: (email: string) => boolean;
     },
   ) {
-    Deno.env.set("OIDC_CLIENT_ID", `https://${domain}/auth`);
-
     const secretString = domain + secret;
     const secretData = new TextEncoder().encode(secretString);
     const hashBuffer = await crypto.subtle.digest("SHA-256", secretData);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     const hashHex = hashArray.map((b) => b.toString(16).padStart(2, "0"))
       .join("");
-    Deno.env.set("OIDC_AUTH_SECRET", hashHex);
 
-    Deno.env.set("OIDC_CLIENT_SECRET", "this.isnt-used-by-lastlogin");
-    Deno.env.set("OIDC_ISSUER", oidc_issuer);
+    this.oidcConfig = {
+      OIDC_CLIENT_ID: `https://${domain}/auth`,
+      OIDC_AUTH_SECRET: hashHex,
+      OIDC_CLIENT_SECRET: "this.isnt-used-by-lastlogin",
+      OIDC_ISSUER: oidc_issuer,
+    };
 
     if (checker) this.checker = checker;
 
@@ -42,11 +44,17 @@ export const Locker = {
   },
 
   oidcAuthMiddleware() {
-    return oidcAuthMiddleware();
+    return async (c: Context, next: Next) => {
+      await initOidcAuthMiddleware(this.oidcConfig!)(c, async () => {
+        await oidcAuthMiddleware()(c, next);
+      });
+    };
   },
 
   async revokeSession(c: Context) {
-    return await revokeSession(c);
+    await initOidcAuthMiddleware(this.oidcConfig!)(c, async () => {
+      await revokeSession(c);
+    });
   },
 
   check(validator?: (email: string) => boolean) {
