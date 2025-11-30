@@ -45,6 +45,10 @@ export const Locker = {
     return oidcAuthMiddleware();
   },
 
+  async revokeSession(c: Context) {
+    return await revokeSession(c);
+  },
+
   check(validator?: (email: string) => boolean) {
     return async (c: Context, next: Next) => {
       const auth = await getAuth(c);

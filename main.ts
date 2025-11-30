@@ -1,6 +1,5 @@
 import { Hono } from "@hono/hono";
 import { logger } from "@hono/hono/logger";
-import { revokeSession } from "@hono/oidc-auth";
 import { serveDir } from "@std/http/file-server";
 import { Locker,  emailRegexpChecker} from "./locker.ts";
 const config = JSON.parse(await Deno.readTextFile("./config.json"));
@@ -25,7 +24,7 @@ app.use("*", async (c, next) => {
   await next();
 }).use(logger())
   .get("/logout", async (c) => {
-    await revokeSession(c);// should be locker. revokeSession AI!
+    await locker!.revokeSession(c);
     return c.html(
       `You have been successfully logged out! <a href="/">home</a>`,
     );
