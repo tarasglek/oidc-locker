@@ -3,6 +3,7 @@ import { logger } from "@hono/hono/logger";
 import { getAuth, oidcAuthMiddleware, revokeSession } from "@hono/oidc-auth";
 import { serveStatic } from "@hono/hono/deno";
 import { serveDir } from "@std/http/file-server";
+import { Locker } from "./locker.ts";
 const config = JSON.parse(await Deno.readTextFile("./config.json"));
 const allowedEmails: string[] = config.allowedEmails;
 
