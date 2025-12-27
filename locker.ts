@@ -48,7 +48,7 @@ export interface Locker {
     secret: string;
     oidc_issuer: string;
     checker?: (c: Context) => Promise<boolean> | boolean;
-  }): Promise<Locker>;
+  } & Partial<OidcAuthEnv>): Promise<Locker>;
   oidcAuthMiddleware(): (c: Context, next: Next) => Promise<Response | void>;
   revokeSession(c: Context): Promise<void>;
   check(
@@ -61,18 +61,19 @@ export const Locker: Locker = {
   oidcConfig: undefined,
 
   async init(
-    { domain, secret, oidc_issuer, checker }: {
+    { domain, secret, oidc_issuer, checker, ...rest }: {
       domain: string;
       secret: string;
       oidc_issuer: string;
       checker?: (c: Context) => Promise<boolean> | boolean;
-    },
+    } & Partial<OidcAuthEnv>,
   ) {
     this.oidcConfig = {
       OIDC_CLIENT_ID: `https://${domain}/auth`,
       OIDC_AUTH_SECRET: secret,
       OIDC_CLIENT_SECRET: "this.isnt-used-by-lastlogin",
       OIDC_ISSUER: oidc_issuer,
+      ...rest,
     };
 
     if (checker) this.checker = checker;
