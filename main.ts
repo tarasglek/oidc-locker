@@ -5,6 +5,15 @@ import { serveDir } from "@std/http/file-server";
 import { emailRegexpChecker, getSecret, Locker } from "./locker.ts"; // use jsr:@tarasglek/locker
 const config = JSON.parse(await Deno.readTextFile("./config.json"));
 
+export const getOidcIssuer = (getEnv = Deno.env.get): string =>
+  getEnv("OIDC_ISSUER") ?? "https://lastlogin.net/";
+
+export const getSessionSecretSalt = (
+  host: string,
+  moduleUrl = import.meta.url,
+  oidcIssuer = getOidcIssuer(),
+): string => host + moduleUrl + oidcIssuer;
+
 let locker: typeof Locker | undefined;
 
 const app = new Hono();
@@ -13,10 +22,13 @@ app.use("*", async (c, next) => {
   const host = c.req.header("x-forwarded-host");
   if (host) {
     if (!locker) {
+      const oidcIssuer = getOidcIssuer();
       locker = await Locker.init({
         domain: host,
-        secret: await getSecret(host + import.meta.url),
-        oidc_issuer: "https://lastlogin.net/",
+        secret: await getSecret(
+          getSessionSecretSalt(host, import.meta.url, oidcIssuer),
+        ),
+        oidc_issuer: oidcIssuer,
         checker: emailRegexpChecker(config.allowedEmails as string[]),
       });
     }

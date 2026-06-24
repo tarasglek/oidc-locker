@@ -2,6 +2,7 @@
   "version": "5",
   "specifiers": {
     "jsr:@smallweb/sandbox@0.1.1": "0.1.1",
+    "jsr:@std/assert@^1.0.14": "1.0.19",
     "jsr:@std/cli@^1.0.23": "1.0.23",
     "jsr:@std/encoding@1.0.8": "1.0.8",
     "jsr:@std/encoding@^1.0.10": "1.0.10",
@@ -12,6 +13,7 @@
     "jsr:@std/http@1.0.12": "1.0.12",
     "jsr:@std/http@^1.0.21": "1.0.21",
     "jsr:@std/internal@^1.0.10": "1.0.12",
+    "jsr:@std/internal@^1.0.12": "1.0.12",
     "jsr:@std/media-types@^1.1.0": "1.1.0",
     "jsr:@std/net@^1.0.6": "1.0.6",
     "jsr:@std/path@^1.1.2": "1.1.2",
@@ -26,6 +28,12 @@
         "jsr:@std/encoding@1.0.8",
         "jsr:@std/html@1.0.3",
         "jsr:@std/http@1.0.12"
+      ]
+    },
+    "@std/assert@1.0.19": {
+      "integrity": "eaada96ee120cb980bc47e040f82814d786fe8162ecc53c91d8df60b8755991e",
+      "dependencies": [
+        "jsr:@std/internal@^1.0.12"
       ]
     },
     "@std/cli@1.0.23": {
@@ -78,7 +86,7 @@
     "@std/path@1.1.2": {
       "integrity": "c0b13b97dfe06546d5e16bf3966b1cadf92e1cc83e56ba5476ad8b498d9e3038",
       "dependencies": [
-        "jsr:@std/internal"
+        "jsr:@std/internal@^1.0.10"
       ]
     },
     "@std/streams@1.0.13": {
